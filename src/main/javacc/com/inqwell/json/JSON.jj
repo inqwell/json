@@ -1,0 +1,438 @@
+/**
+ * Copyright (C) 2012 Inqwell Ltd
+ *
+ * You may distribute under the terms of the Artistic License, as specified in
+ * the README file.
+ *
+ * JSON grammar that uses a callback handler.
+ * 
+ * JSON RFC 4627: http://www.ietf.org/rfc/rfc4627.txt
+ *
+ * Author: Tom Sanders
+ *
+ */
+
+options
+{
+      JAVA_UNICODE_ESCAPE             = true;
+      UNICODE_INPUT                   = true;
+      STATIC                          = false;
+      SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+      ERROR_REPORTING                 = false;
+}
+
+PARSER_BEGIN(JSON)
+
+package com.inqwell.json;
+
+/**
+ * A JSON parser (JavaCC generated - see JSON,jj).
+ * <p/>
+ * Parse a JSON input stream and call back to an implementation
+ * of {@link Handler} at various parse events.
+ * <p/>
+ * The parser is unaware of the object graph being created,
+ * concerning itself only with the identification of
+ * JSON objects, arrays, members, elements and their values.
+ * <p/>
+ * It is biased towards a collections-based result, supporting
+ * generic parameters for the JSON concepts of objects
+ * and arrays, however these can be simply marker interfaces
+ * if required - their implementation is entirely opaque
+ * to the parser. The generic parameters at the class, rather
+ * than the method level arises from JavaCC's limitation in
+ * that regard.
+ * <p/>
+ * To use the parser, instantiate it using one of the
+ * standard JavaCC-generated constructors and then
+ * call <code>parse(Handler)</code>, <code>parseObject(Handler)</code>
+ * or <code>parseArray(Handler)</code>.
+ * <p/>
+ * A number of deviations from the JSON standard are supported.
+ * These are
+ * <ol>
+ * <li>Strings may be single-quoted instead of double-quoted.
+ * An embedded single quote must be escaped but a double
+ * quote need not be.</li>
+ * <li>Object names need not be quoted at all, however in
+ * this case they must be alpha-numeric, like identifiers
+ * in Java or C.</li>
+ * <li>Comments in either Java single or multi-line style
+ * are supported. These are ignored by the parser.</li>
+ * </ol>
+ *
+ * @param <O> The type for JSON objects
+ * @param <A> The type for JSON arrays
+ */
+public class JSON<O, A>
+{
+  /**
+   * Parse the current input using the specified {@link Handler}.
+   * Use this method if you know the JSON root is an object.
+   */
+  @SuppressWarnings("unchecked")
+  public O parseObject(Handler<O, A> h) throws ParseException
+  {
+    // Unchecked cast
+    return (O)start(h);
+  }
+  
+  /**
+   * Parse the current input using the specified {@link Handler}.
+   * Use this method if you know the JSON root is an array.
+   */
+  @SuppressWarnings("unchecked")
+  public A parseArray(Handler<O, A> h) throws ParseException
+  {
+    // Unchecked cast
+    return (A)start(h);
+  }
+  
+  /**
+   * Parse the current input using the specified {@link Handler}.
+   */
+  public Object parse(Handler<O, A> h) throws ParseException
+  {
+    return start(h);
+  }
+  
+  private String processStringEscapes(String s)
+  {
+    int pos, len;
+    int cur = 0;
+    
+    char escape = '\\';
+
+    if ((len = s.length()) == 0 || (pos = s.indexOf(escape)) < 0)
+      return s;
+
+    // Examine escape sequences and substitute for char equivalent
+    StringBuffer buf = new StringBuffer(len);
+
+    while (cur < len)
+    {
+      cur = doEscape(s, buf, cur, pos, len, escape);
+      pos = s.indexOf(escape, cur);
+    }
+
+    return buf.toString();
+  }
+
+  private int doEscape(String       s,
+                       StringBuffer buf,
+                       int          cur,
+                       int          pos,
+                       int          len,
+                       char         escape)
+  {
+    // if pos is non-negative it represents the escape character
+    // at the start of an escape sequence.  Otherwise there
+    // is no sequence left so copy remaining from cur
+
+    int to = (pos < 0) ? len : pos;
+
+    for (int i = cur; i < to; i++)
+      buf.append(s.charAt(i));
+
+    if (pos < 0)
+      return len;
+
+    // consume escape chars
+    // step over escape char
+    char echar = s.charAt(++to);
+
+    switch(echar)
+    {
+      case 'n':
+        buf.append(System.getProperties().get("line.separator")); to++;
+        break;
+
+      case 'r':  buf.append('\r'); to++; break;
+      case 't':  buf.append('\t'); to++; break;
+      case 'b':  buf.append('\b'); to++; break;
+      case 'f':  buf.append('\f'); to++; break;
+      case '\\': buf.append('\\'); to++; break;
+      case '"':  buf.append('"');  to++; break;
+      case '\'': buf.append('\''); to++; break;
+      case '\r': to++; if (to < len && s.charAt(to) == '\n') to++; break;
+      case '\n': to++; break;
+    }
+
+    return to;
+  }
+  
+  // Helper class to allow a boolean to pass up
+  // through the grammar methods.
+  static private class BoolRef
+  {
+    boolean value;
+  }
+}
+
+PARSER_END(JSON)
+
+// JSON insignificant whitespace 
+SKIP:
+{
+  " "
+| "\n"
+| "\r"
+| "\t"
+| "\f"
+}
+
+SPECIAL_TOKEN : /* Comments. These are just a convenience */
+{
+  < SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n") >   
+| < MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
+}
+
+// JSON syntax elements
+TOKEN:
+{
+  < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < COMMA: "," >
+| < COLON: ":" >
+}
+
+TOKEN : /* Values */
+{
+  < TRUE:  "true" >
+| < FALSE: "false" >
+| < NULL:  "null" >
+
+| < INTEGER:
+      <DECIMAL_LITERAL>
+      | ( "\"" "0" "\"" )
+      | ( "'" "0" "'" )
+  >
+  
+| < #DECIMAL_LITERAL: ("\"" | "'") ("-")? ["1"-"9"] (["0"-"9"])* ("\"" | "'") >
+
+| < FLOATING_POINT:
+      ( ("\"" | "'")
+        ("-")? ( (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)?
+               | "." (["0"-"9"])+ (<EXPONENT>)?
+               | (["0"-"9"])+ <EXPONENT>  // TODO: Should need only one of these (no f/d suffix etc)
+               | (["0"-"9"])+ (<EXPONENT>)?  )
+        ("\"" | "'")
+      )
+  >
+| < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+
+| < DBL_QUOTE_STRING: // JSON standard
+      "\""
+      (   (~["\"","\\"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","\""] )
+          )
+      )*
+      "\""
+  >
+
+| < SGL_QUOTE_STRING: // non-standard.
+      "\'"
+      (   (~["\'","\\"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","\'"] )
+          )
+      )*
+      "\'"
+  >
+}
+
+ TOKEN : /* Apparently unquoted names are sometimes assumed. Use an identifier-style for this */
+{
+  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|
+  < #LETTER:
+      [
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+Object start(Handler<O,A> h) :
+{
+  Object result = null;
+}
+{
+  ( result = object(h, null, null, null, new BoolRef())
+  | result = array(h, null, null, null, new BoolRef())
+  )
+  {
+    return result;
+  }
+}
+
+O object(Handler<O,A> h, String name, O parentObject, A parentArray, BoolRef bool) :
+{
+  O thisObject = null;
+}
+{
+  "{"
+  {
+    thisObject = h.startObject(name, parentObject, parentArray);
+  }
+  
+  [ thisObject = member(h, thisObject, bool) ("," thisObject = member(h, thisObject, bool))* ]
+
+  "}"
+  {
+    thisObject = h.endObject(name, thisObject, parentObject, parentArray);
+    return thisObject;
+  }
+}
+
+O member(Handler<O,A> h, O thisObject, BoolRef bool) :
+{
+  String  name    = null;
+  String  value   = null;
+  boolean curBool = bool.value;
+}
+{
+  ( <DBL_QUOTE_STRING>  { name = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
+  | <SGL_QUOTE_STRING>  { name = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
+  | <IDENTIFIER> { name = token.image; }
+  )
+  {
+    name = h.name(name, thisObject);
+  }
+  
+  ":"
+  
+  (
+    (
+      value = value(bool)
+      {
+        thisObject = h.valueToObject(name, value, thisObject, bool.value);
+        bool.value = curBool;
+        return thisObject;
+      }
+    )
+    |
+    (
+      object(h, name, thisObject, null, bool)
+      {
+        bool.value = curBool;
+        return thisObject;
+      }
+    )
+    |
+    (
+      array(h, name, thisObject, null, bool)
+      {
+        bool.value = curBool;
+        return thisObject;
+      }
+    )
+  )
+}
+
+A array(Handler<O,A> h, String name, O parentObject, A parentArray, BoolRef bool) :
+{
+  A   thisArray = null;
+  int count     = 0;
+}
+{
+  "["
+  {
+    thisArray = h.startArray(name, parentObject, parentArray);
+  }
+  
+  [ thisArray = element(h, thisArray, count++, bool)
+    ("," thisArray = element(h, thisArray, count++, bool))* ]
+
+  "]"
+  {
+    thisArray = h.endArray(name, thisArray, parentObject, parentArray);
+    return thisArray;
+  }
+}
+
+A element(Handler<O,A> h, A thisArray, int count, BoolRef bool) :
+{
+  String  value    = null;
+  boolean curBool  = bool.value;
+}
+{
+  value = value(bool)
+  {
+    thisArray = h.valueToArray(value, thisArray, count, bool.value);
+    bool.value = curBool;
+    return thisArray;
+  }
+  |
+  object(h, null, null, thisArray, bool)
+  {
+    bool.value = curBool;
+    return thisArray;
+  }
+  array(h, null, null, thisArray, bool)
+  {
+    bool.value = curBool;
+    return thisArray;
+  }
+}
+
+String value(BoolRef bool) :
+{
+  String  value     = null;
+  boolean isNumeric = false;
+}
+{
+  (
+    (
+      ( <DBL_QUOTE_STRING> { value = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
+      | <SGL_QUOTE_STRING> { value = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
+      | <INTEGER>          { value = token.image.substring(1, token.image.length()-1); isNumeric = true; }
+      | <FLOATING_POINT>   { value = token.image.substring(1, token.image.length()-1); isNumeric = true; }
+      )
+    )
+    |
+    (
+      ( "true"  { value = Handler.JSON_TRUE;  }
+      | "false" { value = Handler.JSON_FALSE; }
+      | "null"  { value = Handler.JSON_NULL;  }
+      )
+    )
+  )
+  {
+    bool.value = isNumeric;
+    return value;
+  }
+}

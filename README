@@ -1,0 +1,63 @@
+A JSON parser using JavaCC
+
+A JSON parser (JavaCC generated - see JSON,jj).
+
+Parse a JSON input stream and call back to an implementation
+of Handler at various parse events.
+
+The parser is unaware of the object graph being created,
+concerning itself only with the identification of
+JSON objects, arrays, members, elements and their values.
+
+It is biased towards a collections-based result, supporting
+generic parameters for the JSON concepts of objects
+and arrays, however these can be simply marker interfaces
+if required - their implementation is entirely opaque
+to the parser. The generic parameters at the class, rather
+than the method level arises from JavaCC's limitation in
+that regard.
+
+To use the parser, instantiate it using one of the
+standard JavaCC-generated constructors and then
+call parse(Handler), parseObject(Handler)
+or parseArray(Handler).
+
+A number of deviations from the JSON standard are supported.
+These are
+
+- Strings may be single-quoted instead of double-quoted.
+An embedded single quote must be escaped but a double
+quote need not be
+
+- Object names need not be quoted at all, however in
+this case they must be alpha-numeric, like identifiers
+in Java or C.
+
+- Comments in either Java single or multi-line style
+are supported. These are ignored by the parser.</li>
+
+http://www.inqwell.com
+
+---------------------------------------------------------
+
+License:
+http://www.opensource.org/licenses/artistic-license-2.0.php
+
+Copyright Inqwell Ltd. 2012. All rights reserved.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
