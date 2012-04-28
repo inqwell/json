@@ -42,6 +42,25 @@ are supported. These are ignored by the parser.</li>
 
 http://www.inqwell.com
 
+Maven:
+    <repository>
+      <id>inqwell-repo</id>
+      <url>https://github.com/inqwell/mvn-repo/raw/master/releases</url>
+      <name>Inqwell Hosted Artifacts</name>
+    </repository>
+    <repository>
+      <id>inqwell-snapshot</id>
+      <url>https://github.com/inqwell/mvn-repo/raw/master/snapshots</url>
+      <name>Inqwell Hosted Artifacts (SNAPSHOT)</name>
+    </repository>
+
+    <dependency>
+      <groupId>com.inqwell</groupId>
+      <artifactId>json</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+
 ---------------------------------------------------------
 
 License:
