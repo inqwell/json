@@ -14,11 +14,11 @@
 
 options
 {
-      JAVA_UNICODE_ESCAPE             = true;
-      UNICODE_INPUT                   = true;
-      STATIC                          = false;
-      SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
-      ERROR_REPORTING                 = false;
+  JAVA_UNICODE_ESCAPE             = true;
+  UNICODE_INPUT                   = true;
+  STATIC                          = false;
+  SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+  ERROR_REPORTING                 = false;
 }
 
 PARSER_BEGIN(JSON)
@@ -42,6 +42,10 @@ package com.inqwell.json;
  * to the parser. The generic parameters at the class, rather
  * than the method level arises from JavaCC's limitation in
  * that regard.
+ * <p/>
+ * The parser discriminates values that are numeric, one of
+ * the JSON literals true/false/null or strings, so that
+ * the Handler implementation can act appropriately. 
  * <p/>
  * To use the parser, instantiate it using one of the
  * standard JavaCC-generated constructors and then

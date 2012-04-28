@@ -129,18 +129,29 @@ public class JSONTest
 		      "\"o\" : 'Double\"Quote' " +        // string double quote
 			"}";                                    // Close object
 	
-	private static final String objectWithNumerics =
-			"{ " +
-	        "pi : \"3.1415927\", " +
-	        "planck:  \"6.626e-34\", " +
-	        "\"lightspeed\" :'2.99792e+08', " +
-	        "'solarmass' :'1.98892e+30', " +
-	        "litnull :null, " +                    // literal null
-	        "\"littrue\" : true, " +               // literal true
-	        "\"litfalse\" : false, " +             // literal false
-	        "string : \"Hello, World\", " +        // string
-		      "\"one\" : '1' " +                     // integer
-			"}"; 
+  private static final String objectWithNumerics =
+      "{ " +
+          "pi : \"3.1415927\", " +
+          "planck:  \"6.626e-34\", " +
+          "\"lightspeed\" :'2.99792e+08', " +
+          "'solarmass' :'1.98892e+30', " +
+          "'string2' :'2.718epsilon', " +        // will be identified as a string
+          "litnull :null, " +                    // literal null
+          "\"littrue\" : true, " +               // literal true
+          "\"litfalse\" : false, " +             // literal false
+          "string1 : \"Hello, World\", " +       // string
+          "\"one\" : '1' " +                     // integer
+      "}"; 
+
+  private static final String croaks1 =
+      "{ [" +
+          "pi : \"3.1415927\" " +
+      "}"; 
+
+  private static final String croaks2 =
+      "{ " +
+          "pi : \"3.1415927\" " +
+      ""; 
 
 	private static java.util.Map<String, Object> rootIsObjectExpected;
 	
@@ -172,7 +183,8 @@ public class JSONTest
 		objectWithNumericsExpected.put("planck", Double.valueOf("6.626e-34"));
 		objectWithNumericsExpected.put("lightspeed", new BigDecimal("2.99792e+08"));
 		objectWithNumericsExpected.put("solarmass", new BigDecimal("1.98892e+30"));
-		objectWithNumericsExpected.put("string", "Hello, World");
+    objectWithNumericsExpected.put("string1", "Hello, World");
+    objectWithNumericsExpected.put("string2", "2.718epsilon");
 		objectWithNumericsExpected.put("one", new Integer(1));
 		objectWithNumericsExpected.put("litnull", null);
 		objectWithNumericsExpected.put("littrue", Boolean.TRUE);
@@ -312,7 +324,19 @@ public class JSONTest
 		Assert.assertEquals("Objects do not match", objectWithNumericsExpected, object);
 	}
 
-	private Reader getReader(String s)
+  @Test(expected=ParseException.class)
+  public void croaks1() throws ParseException
+  {
+    getParser(croaks1).parseArray(new NothingHandler());
+  }
+
+  @Test(expected=ParseException.class)
+  public void croaks2() throws ParseException
+  {
+    getParser(croaks2).parseArray(new NothingHandler());
+  }
+
+  private Reader getReader(String s)
 	{
 		return new StringReader(s);
 	}
@@ -407,6 +431,8 @@ public class JSONTest
   	{
   		if (isNumeric)
   		{
+  		  // When isNumeric is true the parser has identified the
+  		  // value string as being convertible as such.
   		  if ("pi".equals(name))
   		  	object.put(name, Float.valueOf(value));
   		  else if ("planck".equals(name))
@@ -433,4 +459,6 @@ public class JSONTest
   		return object;
   	}
 	}
+	
+	private static class NothingHandler extends DefaultHandler<java.util.Map<String, Object>, java.util.List<Object>> {}
 }

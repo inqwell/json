@@ -134,7 +134,7 @@ public interface Handler<O, A>
 	 * @param value the parsed value. If one of the JSON literals the
 	 * value will be {@link #JSON_TRUE}, {@link #JSON_FALSE} or {@link #JSON_NULL}
 	 * @param array the current array
-	 * @param count TODO
+	 * @param count the current element number, starting at zero.
 	 * @param isNumeric <code>true</code> if the value is a JSON
    * number, <code>false</code> otherwise.
 	 * @return the current array.
