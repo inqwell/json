@@ -38,7 +38,7 @@ this case they must be alpha-numeric, like identifiers
 in Java or C.
 
 - Comments in either Java single or multi-line style
-are supported. These are ignored by the parser.</li>
+are supported. These are ignored by the parser.
 
 http://www.inqwell.com
 
