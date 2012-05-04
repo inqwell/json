@@ -40,6 +40,16 @@ in Java or C.
 - Comments in either Java single or multi-line style
 are supported. These are ignored by the parser.
 
+Version History
+===============
+
+1.1
+Fix numerics grammar
+Bug in element() non-terminal not descending into arrays
+
+1.0
+Initial version    
+
 http://www.inqwell.com
 
 Maven:
