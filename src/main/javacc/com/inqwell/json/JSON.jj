@@ -210,19 +210,16 @@ TOKEN : /* Values */
 
 | < INTEGER:
       <DECIMAL_LITERAL>
-      | ( "\"" "0" "\"" )
-      | ( "'" "0" "'" )
+      | "0"
   >
   
-| < #DECIMAL_LITERAL: ("\"" | "'") ("-")? ["1"-"9"] (["0"-"9"])* ("\"" | "'") >
+| < #DECIMAL_LITERAL: ("-")? ["1"-"9"] (["0"-"9"])* >
 
 | < FLOATING_POINT:
-      ( ("\"" | "'")
-        ("-")? ( (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)?
+      ( ("-")? ( (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)?
                | "." (["0"-"9"])+ (<EXPONENT>)?
                | (["0"-"9"])+ <EXPONENT>  // TODO: Should need only one of these (no f/d suffix etc)
                | (["0"-"9"])+ (<EXPONENT>)?  )
-        ("\"" | "'")
       )
   >
 | < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
@@ -406,6 +403,7 @@ A element(Handler<O,A> h, A thisArray, int count, BoolRef bool) :
     bool.value = curBool;
     return thisArray;
   }
+  |
   array(h, null, null, thisArray, bool)
   {
     bool.value = curBool;
@@ -423,8 +421,8 @@ String value(BoolRef bool) :
     (
       ( <DBL_QUOTE_STRING> { value = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
       | <SGL_QUOTE_STRING> { value = processStringEscapes(token.image.substring(1, token.image.length()-1)); }
-      | <INTEGER>          { value = token.image.substring(1, token.image.length()-1); isNumeric = true; }
-      | <FLOATING_POINT>   { value = token.image.substring(1, token.image.length()-1); isNumeric = true; }
+      | <INTEGER>          { value = token.image; isNumeric = true; }
+      | <FLOATING_POINT>   { value = token.image; isNumeric = true; }
       )
     )
     |

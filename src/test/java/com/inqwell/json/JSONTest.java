@@ -14,6 +14,7 @@
 
 package com.inqwell.json;
 
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -35,23 +36,23 @@ import org.junit.Test;
 public class JSONTest
 {
 	private static final String rootIsArray =
-			"[ " +                              // Open array
-	        "\"3.1415927\", " +             // fraction > 1
-	        "\"0.1415927\", " +             // fraction < 1 leading zero
-	        "null, " +                      // literal null
-	        "\".1415927\", " +              // fraction < 1 no leading zero
-	        "\"3.1415927E00\", " +          // fraction > 1 uses exponent
-	        "\"6.02E+23\", " +              // fraction > 1 -ve exponent
-	        "true, " +                      // literal true
-	        "'2.99792e+08', " +             // fraction > 1 +ve exponent single quote
-	        "'32', // comment\n" +          // integer single quote
-	        "\"32\", " +                    // integer double quote
-	        "false, " +                     // literal false
-	        "'0', /* comment*/" +           // zero single quote
-	        "\"0\", " +                     // zero double quote
-		      " \"Single'Quote\", " +         // string single quote
-		      " 'Double\"Quote' " +           // string double quote
-			"]";                                // Close array
+			"[ " +                       // Open array
+	        "3.1415927, " +             // fraction > 1
+	        "0.1415927, " +             // fraction < 1 leading zero
+	        "null, " +                  // literal null
+	        ".1415927, " +              // fraction < 1 no leading zero
+	        "3.1415927E00, " +          // fraction > 1 uses exponent
+	        "1.602E-19, " +             // fraction > 1 -ve exponent
+	        "true, " +                  // literal true
+	        "2.99792e+08, " +           // fraction > 1 +ve exponent
+	        "32, // comment\n" +        // integer
+	        "'32', " +                  // integer single quote (a string)
+	        "false, " +                 // literal false
+	        "0, /* comment*/" +         // zero
+	        "0, " +                     // zero
+		      "\"Single'Quote\", " +      // string single quote
+		      "'Double\"Quote' " +        // string double quote
+			"]";                         // Close array
 	
 	private static String[] rootIsArrayExpected = {
       "3.1415927",
@@ -59,7 +60,7 @@ public class JSONTest
       "null",
       ".1415927",
       "3.1415927E00",
-      "6.02E+23",
+      "1.602E-19",
       "true",
       "2.99792e+08",
       "32",
@@ -71,86 +72,86 @@ public class JSONTest
       "Double\"Quote" };
 
 	private static final String rootIsObject =
-			"{ " +                                  // Open object
-	        "a : \"3.1415927\", " +             // fraction > 1
-	        "b:  \"0.1415927\", " +             // fraction < 1 leading zero
-	        "c :null, " +                       // literal null
-	        "d : \".1415927\", " +              // fraction < 1 no leading zero
-	        "\"e\" : \"3.1415927E00\", " +      // fraction > 1 uses exponent
-	        "'f' : \"6.02E+23\", " +            // fraction > 1 -ve exponent
-	        "\"g\" : true, " +                  // literal true
-	        "\"h\" :'2.99792e+08', " +          // fraction > 1 +ve exponent single quote
-	        "'i' : '32', " +                    // integer single quote
-	        "'j':\"32\", " +                    // integer double quote
-	        "\"k\" : false, " +                 // literal false
-	        "\"l\" : '0', " +                   // zero single quote
-	        "\"m\" : \"0\", " +                 // zero double quote
-		      "\"n\" : \"Single'Quote\", " +      // string single quote
-		      "\"o\" : 'Double\"Quote' " +        // string double quote
-			"}";                                    // Close object
+			"{ " +                            // Open object
+	        "a : 3.1415927, " +             // fraction > 1
+	        "b:  0.1415927, " +             // fraction < 1 leading zero
+	        "c :null, " +                   // literal null
+	        "d : .1415927, " +              // fraction < 1 no leading zero
+	        "\"e\" : 3.1415927E00, " +      // fraction > 1 uses exponent
+	        "'f' : 1.602E-19, " +           // fraction > 1 -ve exponent
+	        "\"g\" : true, " +              // literal true
+	        "\"h\" :2.99792e+08, " +        // fraction > 1 +ve exponent single quote
+	        "'i' : 32, " +                  // integer
+	        "'j':'32', " +                  // integer single quote (a string)
+	        "\"k\" : false, " +             // literal false
+	        "\"l\" : 0, " +                 // zero
+	        "\"m\" : '0', " +               // zero single quote (a string)
+		      "\"n\" : \"Single'Quote\", " +  // string single quote
+		      "\"o\" : 'Double\"Quote' " +    // string double quote
+			"}";                              // Close object
 	
 	private static final String rootIsArrayNestedObject =
-			"[ " +                              // Open array
-	        "\"3.1415927\", " +             // fraction > 1
-	        "\"0.1415927\", " +             // fraction < 1 leading zero
-	        "null, " +                      // literal null
-	        "\".1415927\", " +              // fraction < 1 no leading zero
-	        "\"3.1415927E00\", " +          // fraction > 1 uses exponent
-	        "\"6.02E+23\", " +              // fraction > 1 -ve exponent
-	      rootIsObject + "," +        // Leave at this position [6]
-	        "true, " +                      // literal true
-	        "'2.99792e+08', " +             // fraction > 1 +ve exponent single quote
-	        "'32', " +                      // integer single quote
-	        "\"32\", " +                    // integer double quote
-	        "false, " +                     // literal false
-	        "'0', " +                       // zero single quote
-	        "\"0\", " +                     // zero double quote
-		      " \"Single'Quote\", " +         // string single quote
-		      " 'Double\"Quote' " +           // string double quote
-			"]";                                // Close array
+			"[ " +                        // Open array
+	        "3.1415927, " +             // fraction > 1
+	        "0.1415927, " +             // fraction < 1 leading zero
+	        "null, " +                  // literal null
+	        ".1415927, " +              // fraction < 1 no leading zero
+	        "3.1415927E00, " +          // fraction > 1 uses exponent
+	        "1.602E-19, " +             // fraction > 1 -ve exponent
+	      rootIsObject + "," +          // Leave at this position [6]
+	        "true, " +                  // literal true
+	        "2.99792e+08, " +           // fraction > 1 +ve exponent
+	        "32, " +                    // integer
+	        "\"32\", " +                // integer double quote (a string)
+	        "false, " +                 // literal false
+	        "0, " +                     // zero
+	        "\"0\", " +                 // zero double quote (a string)
+		      " \"Single'Quote\", " +     // string single quote
+		      " 'Double\"Quote' " +       // string double quote
+			"]";                          // Close array
 
 	private static final String rootIsObjectNestedArray =
-			"{ " +                                  // Open object
-	        "a : \"3.1415927\", " +             // fraction > 1
-	        "b:  \"0.1415927\", " +             // fraction < 1 leading zero
-	        "c :null, " +                       // literal null
-	        "d : \".1415927\", " +              // fraction < 1 no leading zero
-	        "\"e\" : \"3.1415927E00\", " +      // fraction > 1 uses exponent
-	        "'f' : \"6.02E+23\", " +            // fraction > 1 -ve exponent
-	        "\"g\" : true, " +                  // literal true
-	        "\"h\" :'2.99792e+08', " +          // fraction > 1 +ve exponent single quote
+			"{ " +                            // Open object
+	        "a : 3.1415927, " +             // fraction > 1
+	        "b:  0.1415927, " +             // fraction < 1 leading zero
+	        "c :null, " +                   // literal null
+	        "d : .1415927, " +              // fraction < 1 no leading zero
+	        "\"e\" : 3.1415927E00, " +      // fraction > 1 uses exponent
+	        "'f' : 1.602E-19, " +           // fraction > 1 -ve exponent
+	        "\"g\" : true, " +              // literal true
+	        "\"h\" :2.99792e+08, " +        // fraction > 1 +ve exponent
 	      "'nested' : " + rootIsArray + "," +
-	        "'i' : '32', " +                    // integer single quote
-	        "'j':\"32\", " +                    // integer double quote
-	        "\"k\" : false, " +                 // literal false
-	        "\"l\" : '0', " +                   // zero single quote
-	        "\"m\" : \"0\", " +                 // zero double quote
-		      "\"n\" : \"Single'Quote\", " +      // string single quote
-		      "\"o\" : 'Double\"Quote' " +        // string double quote
-			"}";                                    // Close object
+	        "'i' : 32, " +                  // integer
+	        "'j':\"32\", " +                // integer double quote (a string)
+	        "\"k\" : false, " +             // literal false
+	        "\"l\" : 0, " +                 // zero
+	        "\"m\" : \"0\", " +             // zero double quote (a string)
+		      "\"n\" : \"Single'Quote\", " +  // string single quote
+		      "\"o\" : 'Double\"Quote' " +    // string double quote
+			"}";                              // Close object
 	
   private static final String objectWithNumerics =
       "{ " +
-          "pi : \"3.1415927\", " +
-          "planck:  \"6.626e-34\", " +
-          "\"lightspeed\" :'2.99792e+08', " +
-          "'solarmass' :'1.98892e+30', " +
-          "'string2' :'2.718epsilon', " +        // will be identified as a string
+          "pi : 3.1415927, " +
+          "planck:  6.626e-34, " +
+          "\"lightspeed\" :2.99792e+08, " +
+          "'solarmass' :1.98892e+30, " +
+          "'zero' :0, " +                        // zero
           "litnull :null, " +                    // literal null
           "\"littrue\" : true, " +               // literal true
           "\"litfalse\" : false, " +             // literal false
           "string1 : \"Hello, World\", " +       // string
-          "\"one\" : '1' " +                     // integer
+          "\"one\" : 1 " +                       // integer
       "}"; 
 
   private static final String croaks1 =
       "{ [" +
-          "pi : \"3.1415927\" " +
+          "pi : 3.1415927 " +
       "}"; 
 
   private static final String croaks2 =
       "{ " +
-          "pi : \"3.1415927\" " +
+          "pi : 3.1415927 " +
       ""; 
 
 	private static java.util.Map<String, Object> rootIsObjectExpected;
@@ -184,8 +185,8 @@ public class JSONTest
 		objectWithNumericsExpected.put("lightspeed", new BigDecimal("2.99792e+08"));
 		objectWithNumericsExpected.put("solarmass", new BigDecimal("1.98892e+30"));
     objectWithNumericsExpected.put("string1", "Hello, World");
-    objectWithNumericsExpected.put("string2", "2.718epsilon");
-		objectWithNumericsExpected.put("one", new Integer(1));
+    objectWithNumericsExpected.put("one", new Integer(1));
+    objectWithNumericsExpected.put("zero", new Integer(0));
 		objectWithNumericsExpected.put("litnull", null);
 		objectWithNumericsExpected.put("littrue", Boolean.TRUE);
 		objectWithNumericsExpected.put("litfalse", Boolean.FALSE);
@@ -335,6 +336,18 @@ public class JSONTest
   {
     getParser(croaks2).parseArray(new NothingHandler());
   }
+  
+  @Test
+  public void testFile() throws ParseException
+  {
+    // Parse a file - the only expectation is that the file
+    // parses without exception.
+    InputStream is = this.getClass().getResourceAsStream("test.json");
+    
+    JSON<java.util.Map<String, Object>, java.util.List<Object>> parser = new JSON<java.util.Map<String, Object>, java.util.List<Object>>(is);
+    
+    parser.parse(new NothingHandler());
+  }
 
   private Reader getReader(String s)
 	{
@@ -441,7 +454,7 @@ public class JSONTest
   		  	object.put(name, new BigDecimal(value));
   		  else if("solarmass".equals(name))
   		  	object.put(name, new BigDecimal(value));
-  		  else if("one".equals(name))
+  		  else if("one".equals(name) || "zero".equals(name))
   		  	object.put(name, new Integer(value));
   		}
   		else if (DefaultHandler.isLiteral(value)) // the test for one of the three JSON literals

@@ -1,0 +1,83 @@
+{"root": {"data": 
+[
+  [
+    {
+      "a": "String AA"
+    },
+    "String A2"
+  ],
+  {
+    "pi": 3.142,
+    "c": 1234567.9
+  },
+  {
+    "cat": "Stuff on my cat",
+    "a3": "",
+    "fooinstance": {
+      "typedef": "xmltest_types_FooType",
+      "Comment": "Comments & a ' character, überslackers of the world unite",
+      "HotFlag": "M",
+      "LastUpdated": null,
+      "ProductId": null,
+      "Rate": 1.235,
+      "Big": 3456789.01
+    },
+    "keyK": {
+      "HotFlag": null,
+      "__key": "K",
+      "__descriptor": "xmltest.types.FooType"
+    }
+  }
+],
+  "INQmetadata": {
+    "xmltest_types_FooType": {
+      "HotFlag": {
+        "INQwidth": 5,
+        "INQlabel": "HotFlag",
+        "INQenum0": {
+          "INQexternal": "Hot",
+          "INQinternal": "H"
+        },
+        "INQenum1": {
+          "INQexternal": "Warm",
+          "INQinternal": "M"
+        },
+        "INQenum2": {
+          "INQexternal": "Cold",
+          "INQinternal": "E"
+        }
+      
+      },
+      "LastUpdated": {
+        "INQwidth": 10,
+        "INQlabel": "LastUpdated"
+      
+      },
+      "Big": {
+        "INQisnumeric": true,
+        "INQwidth": 10,
+        "INQlabel": "Big"
+      
+      },
+      "Comment": {
+        "INQwidth": 32,
+        "INQlabel": "Comment"
+      
+      },
+      "Rate": {
+        "INQisnumeric": true,
+        "INQwidth": 5,
+        "INQlabel": "Rate"
+      
+      },
+      "ProductId": {
+        "INQisnumeric": true,
+        "INQwidth": 10,
+        "INQlabel": "ProductId"
+      
+      }
+    
+    }
+  
+  }
+}}
