@@ -42,6 +42,21 @@ public class DefaultHandler<O, A> implements Handler<O, A>
 	{
 		return value.equals(JSON_TRUE) || value.equals(JSON_FALSE) || value.equals(JSON_NULL);
 	}
+	
+  public static boolean isNull(String value)
+  {
+    return value.equals(JSON_NULL);
+  }
+
+  public static boolean isTrue(String value)
+  {
+    return value.equals(JSON_TRUE);
+  }
+
+  public static boolean isFalse(String value)
+  {
+    return value.equals(JSON_FALSE);
+  }
 
 	@Override
 	public O startObject(String name, O parentObject, A parentArray)

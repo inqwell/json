@@ -43,6 +43,10 @@ are supported. These are ignored by the parser.
 Version History
 ===============
 
+1.2
+Added additional utility static methods in DefaultHandler
+to identify true/false/null
+
 1.1
 Fix numerics grammar
 Bug in element() non-terminal not descending into arrays
@@ -67,7 +71,7 @@ Maven:
     <dependency>
       <groupId>com.inqwell</groupId>
       <artifactId>json</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
     </dependency>
 
 
